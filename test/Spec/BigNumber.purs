@@ -2,7 +2,6 @@ module CoreSpec.BigNumber (bigNumberSpec) where
 
 
 import Prelude
-
 import Control.Monad.Except (runExcept)
 import Data.Argonaut as A
 import Data.Either (Either(..), fromRight)
@@ -54,6 +53,11 @@ bigNumberSpec = describe "BigNumber-spec" do
         divide (embed 2) (embed 3) `shouldEqual` embed 0
         divide (embed 100) (embed 10) `shouldEqual` embed 10
         divide (embed 100) (embed 3) `shouldEqual` embed 33
+
+      it "can handle mod" do
+        (mod (embed 2) (embed 1) :: BigNumber) `shouldEqual` (embed 0)
+        (mod (embed 3) (embed 4) :: BigNumber) `shouldEqual` (embed 3)
+        (mod (embed $ negate 2) (embed 3) :: BigNumber) `shouldEqual` (embed $ negate 2)
 
     describe "BigNumber arithmetic" do
       it "can add, subtract, and multiply BigNumbers as an Int-Alegbra" do
