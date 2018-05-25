@@ -104,3 +104,10 @@ exports.divide = function (n) {
         return newN;
     };
 };
+
+exports._modBigNumber = function (n) {
+    return function (d) {
+        var newN = n.mod(d);
+        return newN;
+    };
+};
