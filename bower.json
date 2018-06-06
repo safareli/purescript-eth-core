@@ -18,17 +18,18 @@
     "output"
   ],
   "dependencies": {
-    "purescript-prelude": "^3.3.0",
-    "purescript-console": "^3.0.0",
-    "purescript-modules": "^3.0.0",
-    "purescript-foreign": "^4.0.1",
-    "purescript-simple-json": "^2.0.1",
-    "purescript-sets": "^3.2.0",
-    "purescript-bytestrings": "^6.0.0",
-    "purescript-spec": "^2.0.0",
-    "purescript-debug": "^3.0.0"
+    "purescript-prelude": "^4.0.0",
+    "purescript-console": "^4.1.0",
+    "purescript-modules": "AlexMouton/purescript-modules#compiler/0.12",
+    "purescript-foreign": "^5.0.0",
+    "purescript-foreign-generic": "justinwoo/purescript-foreign-generic#compiler/0.12",
+    "purescript-simple-json": "^4.0.0",
+    "purescript-ordered-collections": "^1.0.0",
+    "purescript-bytestrings": "kejace/purescript-bytestrings#compiler/0.12",
+    "purescript-spec": "^3.0.0",
+    "purescript-debug": "^4.0.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^3.0.0"
+    "purescript-psci-support": "^4.0.0"
   }
 }

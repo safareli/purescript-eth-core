@@ -7,7 +7,7 @@ import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Network.Ethereum.Core.BigNumber (BigNumber, decimal, embed, hexadecimal, parseBigNumber)
 
-bigNumberSpec :: forall r . Spec r Unit
+bigNumberSpec :: Spec Unit
 bigNumberSpec = describe "BigNumber-spec" do
 
     describe "toBigNumber tests" do

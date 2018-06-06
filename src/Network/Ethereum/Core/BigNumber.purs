@@ -12,8 +12,8 @@ module Network.Ethereum.Core.BigNumber
 
 import Prelude
 
-import Data.Foreign (Foreign)
-import Data.Foreign.Class (class Decode, class Encode, decode, encode)
+import Foreign (Foreign)
+import Foreign.Class (class Decode, class Encode, decode, encode)
 import Data.Int (Radix, binary, decimal, hexadecimal, floor) as Int
 import Data.Maybe (Maybe(..))
 import Data.Module (class LeftModule, class RightModule)

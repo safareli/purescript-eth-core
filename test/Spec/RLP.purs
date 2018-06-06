@@ -14,10 +14,9 @@ import Node.Encoding (Encoding(Hex, UTF8))
 import Partial.Unsafe (unsafePartial)
 import Test.Spec (Spec, it, describe)
 import Test.Spec.Assertions (shouldEqual)
-import Test.Spec.Runner (RunnerEffects)
 import Type.Quotient (mkQuotient)
 
-rlpSpec :: Spec (RunnerEffects ()) Unit
+rlpSpec :: Spec Unit
 rlpSpec = do
 
   describe "RLP Spec" $ do

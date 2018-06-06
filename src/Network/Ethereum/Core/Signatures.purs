@@ -24,7 +24,7 @@ import Prelude
 import Data.ByteString as BS
 import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
 import Data.Maybe (Maybe(..), fromJust)
-import Data.Foreign.Class (class Decode, class Encode)
+import Foreign.Class (class Decode, class Encode)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Network.Ethereum.Core.HexString (HexString, dropHex, hexLength, toByteString, fromByteString)

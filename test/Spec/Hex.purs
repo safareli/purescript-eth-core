@@ -10,7 +10,7 @@ import Partial.Unsafe (unsafePartial)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
-hexSpec :: forall r . Spec r Unit
+hexSpec :: Spec Unit
 hexSpec = describe "hex-spec" do
 
     describe "bytestringFromHexString" do
