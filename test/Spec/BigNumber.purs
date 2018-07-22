@@ -2,10 +2,19 @@ module CoreSpec.BigNumber (bigNumberSpec) where
 
 
 import Prelude
-import Data.Maybe (Maybe(Just))
+
+import Control.Monad.Except (runExcept)
+import Data.Argonaut as A
+import Data.Either (Either(..), fromRight)
+import Foreign (unsafeToForeign)
+import Foreign.Class (decode, encode)
+import Data.Maybe (Maybe(Just), fromJust)
+import Network.Ethereum.Core.BigNumber (BigNumber, decimal, embed, hexadecimal, parseBigNumber, divide)
+import Partial.Unsafe (unsafePartial)
+import Simple.JSON (readImpl)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import Network.Ethereum.Core.BigNumber (BigNumber, decimal, embed, hexadecimal, parseBigNumber)
+
 
 bigNumberSpec :: Spec Unit
 bigNumberSpec = describe "BigNumber-spec" do
@@ -39,6 +48,13 @@ bigNumberSpec = describe "BigNumber-spec" do
         Just (embed 0 :: BigNumber) `shouldEqual` (parseBigNumber decimal "0")
         Just (embed 15 :: BigNumber) `shouldEqual` (parseBigNumber decimal "15")
 
+      it "can handle roundedDiv" do
+        divide (embed 2) (embed 1) `shouldEqual` embed 2
+        divide (embed 2) (embed 2) `shouldEqual` embed 1
+        divide (embed 2) (embed 3) `shouldEqual` embed 0
+        divide (embed 100) (embed 10) `shouldEqual` embed 10
+        divide (embed 100) (embed 3) `shouldEqual` embed 33
+
     describe "BigNumber arithmetic" do
       it "can add, subtract, and multiply BigNumbers as an Int-Alegbra" do
         (add <$> (parseBigNumber decimal "1") <*> (parseBigNumber decimal "1")) `shouldEqual` (parseBigNumber decimal "2")
@@ -47,3 +63,15 @@ bigNumberSpec = describe "BigNumber-spec" do
         ((parseBigNumber decimal "21") >>= \x -> pure $ x - zero) `shouldEqual` parseBigNumber hexadecimal "0x15"
         (Just $ one `mul` one) `shouldEqual` parseBigNumber decimal "1"
         (Just $ one * embed (-7)) `shouldEqual` parseBigNumber hexadecimal "-0x7"
+
+      it "can handle deserialization" do
+        let bnString = "f43"
+            d1 = unsafePartial $ fromRight $ runExcept $ readImpl (unsafeToForeign bnString)
+            d2 = unsafePartial $ fromRight $ runExcept $ decode (unsafeToForeign bnString)
+            d3 = unsafePartial $ fromRight $ A.decodeJson (A.fromString bnString)
+            d4 = unsafePartial $ fromJust $ parseBigNumber hexadecimal bnString
+        d4 `shouldEqual` d1
+        d4 `shouldEqual` d2
+        d4 `shouldEqual` d3
+        runExcept (decode (encode d1)) `shouldEqual` Right d4
+        (A.decodeJson (A.encodeJson d1)) `shouldEqual` Right d4

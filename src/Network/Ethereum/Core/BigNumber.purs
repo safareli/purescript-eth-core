@@ -7,17 +7,20 @@ module Network.Ethereum.Core.BigNumber
   , toTwosComplement
   , unsafeToInt
   , floorBigNumber
+  , divide
   , module Int
   ) where
 
 import Prelude
 
-import Foreign (Foreign)
+import Foreign (ForeignError(..), readString, fail)
 import Foreign.Class (class Decode, class Encode, decode, encode)
+import Data.Argonaut as A
+import Data.Either (Either(..), either)
 import Data.Int (Radix, binary, decimal, hexadecimal, floor) as Int
 import Data.Maybe (Maybe(..))
 import Data.Module (class LeftModule, class RightModule)
-import Simple.JSON (class ReadForeign)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 
 --------------------------------------------------------------------------------
 -- * BigNumber
@@ -87,10 +90,7 @@ class (Ring r, Ring a, LeftModule a r, RightModule a r) <= Algebra a r where
 instance embedInt' :: Algebra BigNumber Int where
   embed = embedInt
 
-foreign import reciprical :: BigNumber -> BigNumber
-
-instance recipBigNumber :: DivisionRing BigNumber where
-  recip = reciprical
+foreign import divide :: BigNumber -> BigNumber -> BigNumber
 
 foreign import fromStringAsImpl
   :: (forall a . a -> Maybe a)
@@ -98,7 +98,6 @@ foreign import fromStringAsImpl
   -> Int.Radix
   -> String
   -> Maybe BigNumber
-
 
 -- | Convert a string in the given base to a `BigNumber`
 parseBigNumber :: Int.Radix -> String -> Maybe BigNumber
@@ -119,13 +118,32 @@ unsafeToInt = Int.floor <<< toNumber
 -- | Take the integer part of a big number
 foreign import floorBigNumber :: BigNumber -> BigNumber
 
-foreign import toBigNumber :: Foreign -> BigNumber
+_encode :: BigNumber -> String
+_encode = (append "0x") <<< toString Int.hexadecimal
+
+_decode :: String -> Either String BigNumber
+_decode str = case parseBigNumber Int.hexadecimal str of
+  Nothing -> Left $ "Failed to parse as BigNumber: " <> str
+  Just n -> Right n
 
 instance decodeBigNumber :: Decode BigNumber where
-  decode = pure <<< toBigNumber
+  decode x = do
+    str <- readString x
+    either (fail <<< ForeignError) pure $ _decode str
 
 instance readFBigNumber :: ReadForeign BigNumber where
   readImpl = decode
 
+instance writeFBigNumber :: WriteForeign BigNumber where
+  writeImpl = encode
+
 instance encodeBigNumber :: Encode BigNumber where
-  encode = encode <<< (append "0x") <<< toString Int.hexadecimal
+  encode = encode <<< _encode
+
+instance decodeJsonBigNumber :: A.DecodeJson BigNumber where
+  decodeJson json = do
+    str <- A.decodeJson json
+    _decode str
+
+instance encodeJsonBigNumber :: A.EncodeJson BigNumber where
+  encodeJson = A.encodeJson <<< _encode

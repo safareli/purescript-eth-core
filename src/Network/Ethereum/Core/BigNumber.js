@@ -49,7 +49,7 @@ exports.fromStringAsImpl = function (just) {
             } else {
               result = new BigNumber(s, radix);
             }
-        } catch (e) {
+        } catch (_) {
           return nothing;
         }
         return just(result);
@@ -60,11 +60,6 @@ exports.fromStringAsImpl = function (just) {
 
 exports.toString = function (radix) {
   return function (bn) { return bn.toString(radix); };
-};
-
-exports.reciprical = function (bn) {
-  var one = new BigNumber(1, 10);
-  return one.div(bn);
 };
 
 exports.toTwosComplement = function (bn) {
@@ -103,13 +98,9 @@ var isString = function (object) {
         (object && object.constructor && object.constructor.name === 'String');
 };
 
-exports.toBigNumber = function(number) {
-    if (isBigNumber(number))
-        return number;
-
-    if (isString(number) && (number.indexOf('0x') === 0 || number.indexOf('-0x') === 0)) {
-        return new BigNumber(number.replace('0x',''), 16);
-    }
-
-    return new BigNumber(number.toString(10), 10);
+exports.divide = function (n) {
+    return function (d) {
+        var newN = n.div(d);
+        return newN;
+    };
 };

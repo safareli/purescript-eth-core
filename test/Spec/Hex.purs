@@ -2,13 +2,22 @@ module CoreSpec.Hex (hexSpec) where
 
 import Prelude
 
+import Control.Monad.Except (runExcept)
+import Data.Argonaut as A
 import Data.ByteString as BS
+import Data.Either (Either(..), fromRight)
+import Foreign (unsafeToForeign)
+import Foreign.Class (encode, decode)
 import Data.Maybe (Maybe(Just), fromJust)
-import Network.Ethereum.Core.HexString (mkHexString, toByteString, toUtf8, toAscii, fromUtf8, fromAscii)
+import Network.Ethereum.Core.HexString (HexString, mkHexString, toByteString, toUtf8, toAscii, fromUtf8, fromAscii)
 import Node.Encoding (Encoding(Hex))
 import Partial.Unsafe (unsafePartial)
+import Simple.JSON (readImpl)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
+import Effect.Exception            (error)
+import Control.Monad.Error.Class   (throwError)
+
 
 hexSpec :: Spec Unit
 hexSpec = describe "hex-spec" do
@@ -46,3 +55,26 @@ hexSpec = describe "hex-spec" do
       it "can convert asci to hex" do
         fromAscii "myString" `shouldEqual` unsafePartial (fromJust <<< mkHexString) "6d79537472696e67"
         fromAscii "myString\00" `shouldEqual` unsafePartial (fromJust <<< mkHexString) "6d79537472696e6700"
+
+    describe "json tests" do
+
+      it "can convert hex strings to and from json" do
+
+        let hx = (unsafePartial (fromJust <<< mkHexString) "0x6d79537472696e67")
+            hxJson = A.fromString "0x6d79537472696e67" :: A.Json
+
+        when ((A.encodeJson <$> (A.decodeJson hxJson :: Either String HexString)) /= Right hxJson) (throwError $ error $ "failed converting from JSON")
+        A.decodeJson (A.encodeJson hx) `shouldEqual` Right hx
+
+      it "can handle deserialization" do
+
+        let hxString = "0f43"
+            d1 = unsafePartial $ fromRight $ runExcept $ readImpl (unsafeToForeign hxString)
+            d2 = unsafePartial $ fromRight $ runExcept $ decode (unsafeToForeign hxString)
+            d3 = unsafePartial $ fromRight $ A.decodeJson (A.fromString hxString)
+            d4 = unsafePartial $ fromJust $ mkHexString hxString
+        d4 `shouldEqual` d1
+        d4 `shouldEqual` d2
+        d4 `shouldEqual` d3
+        runExcept (decode (encode d1)) `shouldEqual` Right d4
+        (A.decodeJson (A.encodeJson d1)) `shouldEqual` Right d4
